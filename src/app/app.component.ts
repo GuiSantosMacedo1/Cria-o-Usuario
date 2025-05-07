@@ -34,19 +34,6 @@ export class AppComponent {
     }
   }
 
-  openModalUsers(): void {
-    const modal = document.querySelector('.modal-users') as HTMLElement;
-    const overlay = document.querySelector('.modal-overlay') as HTMLElement;
-    modal.classList.add('show');
-    overlay.classList.add('show');
-  }
-  closeModalUsers(): void {
-    const modal = document.querySelector('.modal-users') as HTMLElement;
-    const overlay = document.querySelector('.modal-overlay') as HTMLElement;
-      modal.classList.remove('show');
-      overlay.classList.remove('show');
-    };
-
   openModalCreate(): void {
     const modal = document.querySelector('.modal-create') as HTMLElement;
     const overlay = document.querySelector('.modal-overlay') as HTMLElement;

@@ -2,7 +2,7 @@
   <h1>Create User</h1>
   <nav>
     <ul>
-      <li> <a (click)="openModalUsers()"> Usuários criados</a></li>
+      <li> <a> Usuários criados</a></li>
     </ul>
   </nav>
 </header>
@@ -39,14 +39,3 @@
     <p>Address: {{ userForm.value.address }}</p>
     <button (click)="closeModalCreate()">Close</button>
   </div>
-
-<div class="modal-overlay"></div>
-<div class="modal-users">
-  <div class="modal-content-users">
-    <h2>Users</h2>
-    <p>Name: {{ userForm.value.name }}</p>
-    <p>Age: {{ userForm.value.age }}</p>
-    <p>Address: {{ userForm.value.address }}</p>
-    <button (click)="closeModalUsers()">Close</button>
-  </div>
-</div>
