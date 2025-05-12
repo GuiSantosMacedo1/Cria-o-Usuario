@@ -220,20 +220,13 @@ export class AppComponent {
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-
-      // Assume the first sheet contains the data
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-
-      // Convert the sheet to JSON
       const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-
-      // Map the data to the address fields
       if (data.length > 1) {
         const [header, ...rows] = data;
 
-        // Assuming the Excel file has columns: Street, Number, Block, Apartment, Country, City, District
-        const address: string[] = rows[0] as string[]; // Use the first row of data
+        const address: string[] = rows[0] as string[];
         this.userForm.patchValue({
           address: {
             street: address[0] || '',
