@@ -17,4 +17,14 @@ export class UserService {
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
+  
+  getUserById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+  updateUser(id: number, userData: any): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}`, userData);
+  }
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
 }
