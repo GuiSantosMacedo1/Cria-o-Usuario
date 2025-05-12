@@ -27,13 +27,21 @@ header {
 form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin: 2rem;
-  align-items: center;
+  gap: 1.5rem; /* Espaçamento entre os campos */
+  margin: 2rem auto;
+  max-width: 600px; /* Largura máxima do formulário */
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
     label {
-      font-size: 1.2rem;
+      font-size: 1rem;
       color: #333;
     }
 
@@ -42,8 +50,17 @@ form {
       padding: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 4px;
-      width: 100%;
-      max-width: 400px;
+    }
+  }
+
+  .address {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Duas colunas */
+    gap: 1rem;
+
+    div {
+      display: flex;
+      flex-direction: column;
     }
   }
 
@@ -58,12 +75,6 @@ form {
     &:hover {
       background-color: #0056b3;
     }
-  }
-
-  .address {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
   }
 }
 

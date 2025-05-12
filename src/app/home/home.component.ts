@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import * as XLSX from 'xlsx';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -205,5 +206,48 @@ export class AppComponent {
     const overlay = document.querySelector('.modal-overlay') as HTMLElement;
     modal.classList.remove('show');
     overlay.classList.remove('show');
+  }
+
+  onFileChange(event: any): void {
+    const target: DataTransfer = <DataTransfer>(event.target);
+
+    if (target.files.length !== 1) {
+      console.error('Cannot use multiple files');
+      return;
+    }
+
+    const reader: FileReader = new FileReader();
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+      // Assume the first sheet contains the data
+      const wsname: string = wb.SheetNames[0];
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+      // Convert the sheet to JSON
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+      // Map the data to the address fields
+      if (data.length > 1) {
+        const [header, ...rows] = data;
+
+        // Assuming the Excel file has columns: Street, Number, Block, Apartment, Country, City, District
+        const address: string[] = rows[0] as string[]; // Use the first row of data
+        this.userForm.patchValue({
+          address: {
+            street: address[0] || '',
+            number: address[1] || '',
+            block: address[2] || '',
+            apartment: address[3] || '',
+            country: address[4] || '',
+            city: address[5] || '',
+            district: address[6] || '',
+          },
+        });
+      }
+    };
+
+    reader.readAsBinaryString(target.files[0]);
   }
 }
