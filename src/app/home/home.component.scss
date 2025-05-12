@@ -27,9 +27,9 @@ header {
 form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Espaçamento entre os campos */
+  gap: 1.5rem;
   margin: 2rem auto;
-  max-width: 600px; /* Largura máxima do formulário */
+  max-width: 600px;
   padding: 1rem;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -55,7 +55,7 @@ form {
 
   .address {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Duas colunas */
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
 
     div {
