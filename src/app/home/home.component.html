@@ -48,7 +48,7 @@
       />
     </div>
   </div>
-  <button type="submit" [disabled]="userForm.invalid">Create User</button>
+  <button type="submit" [disabled]="userForm.invalid" (click)="clearAddress()">Create User</button>
 </form>
 
 
@@ -86,12 +86,7 @@
           <p>Name: {{ user.name }}</p>
           <p>Age: {{ user.age }}</p>
           <p>Sex: {{ user.sex }}</p>
-          <p>Address:</p>
-          <ul>
-            <li>
-              Street: {{ user.address?.street }} N°: {{ user.address?.number }}
-            </li>
-          </ul>
+          <p>Address: {{ user.address?.street }} N°: {{ user.address?.number }}</p>
         </div>
         <div class="user-actions">
           <button class="edit-button" (click)="modalEdit(user)">

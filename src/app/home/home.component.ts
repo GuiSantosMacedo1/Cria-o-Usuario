@@ -52,7 +52,7 @@ export class AppComponent {
         district: ['', [Validators.required]],
       }),
     });
-      this.editForm = this.fb.group({
+    this.editForm = this.fb.group({
       name: ['', [Validators.required]],
       age: ['', [Validators.required, Validators.min(1)]],
       sex: ['', [Validators.required]],
@@ -68,7 +68,6 @@ export class AppComponent {
         district: ['', [Validators.required]],
       }),
     });
-
   }
 
   ngOnInit() {
@@ -99,10 +98,29 @@ export class AppComponent {
       this.userService.createUser(userData).subscribe(() => {
         this.openModalCreate();
         this.getUsers();
-        this.userForm.reset();
+        this.userForm.reset({
+        name: '',
+        age: null,
+        sex: '',
+        document: '',
+        status: true,
+        address: {
+          street: '',
+          number: '',
+          block: '',
+          apartment: '',
+          country: '',
+          city: '',
+          district: '',
+        },
       });
+          console.log('Dados enviados:', userData); // Verifique os dados no console
+
+      });
+      this.userForm.markAsPristine();
+      this.userForm.markAsUntouched();
     } else {
-      console.log('Form is invalid');
+      console.log('Form is invalid', userData);
     }
   }
 
@@ -138,7 +156,7 @@ export class AppComponent {
     overlay.classList.add('show');
     this.closeModalUsers();
   }
-  
+
   closeModalEdit() {
     const modal = document.querySelector('.modal-edit') as HTMLElement;
     const overlay = document.querySelector('.modal-overlay') as HTMLElement;
@@ -146,7 +164,7 @@ export class AppComponent {
     overlay.classList.remove('show');
     this.openModalUsers();
   }
-  
+
   confirmEdit(userId: number) {
     const updatedUser = this.editForm.value;
     this.userService.updateUser(userId, updatedUser).subscribe(() => {
@@ -209,7 +227,7 @@ export class AppComponent {
   }
 
   onFileChange(event: any): void {
-    const target: DataTransfer = <DataTransfer>(event.target);
+    const target: DataTransfer = <DataTransfer>event.target;
 
     if (target.files.length !== 1) {
       console.error('Cannot use multiple files');
@@ -223,24 +241,45 @@ export class AppComponent {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      if (data.length > 1) {
-        const [header, ...rows] = data;
+          if (data.length > 1) {
+      const [header, ...rows] = data;
 
-        const address: string[] = rows[0] as string[];
-        this.userForm.patchValue({
-          address: {
-            street: address[0] || '',
-            number: address[1] || '',
-            block: address[2] || '',
-            apartment: address[3] || '',
-            country: address[4] || '',
-            city: address[5] || '',
-            district: address[6] || '',
-          },
-        });
-      }
-    };
+      // Verifique se os valores estão presentes e no formato correto
+      const address: string[] = rows[0] as string[];
+      const street = address[0] || '';
+      const number = address[1] || '';
+      const block = address[2] || '';
+      const apartment = address[3] || '';
+      const country = address[4] || '';
+      const city = address[5] || '';
+      const district = address[6] || '';
 
+      this.userForm.patchValue({
+        address: {
+          street,
+          number,
+          block,
+          apartment,
+          country,
+          city,
+          district,
+        },
+      });
+      const addressGroup = this.userForm.get(['address']) as FormGroup;
+      Object.keys(addressGroup.controls).forEach((key) => {
+        const control = addressGroup.get(key);
+        control?.markAsDirty();
+        control?.updateValueAndValidity();
+      });
+    }
+  };
     reader.readAsBinaryString(target.files[0]);
   }
+
+  clearAddress(): void {
+    const fileInput = document.getElementById('excelFile') as HTMLInputElement;
+  if (fileInput) {
+    fileInput.value = ''; // Redefinir o valor do campo de arquivo
+  }
+}
 }
