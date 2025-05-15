@@ -24,6 +24,9 @@ export class UserService {
   updateUser(id: number, userData: any): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}`, userData);
   }
+  uploadUserWithExcel(userData: FormData): Observable<any> {
+  return this.http.post(`${this.apiUrl}/upload`, userData);
+}
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }

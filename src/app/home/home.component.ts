@@ -14,6 +14,8 @@ import { HttpClientModule } from '@angular/common/http';
   styleUrls: ['./home.component.scss'],
 })
 export class AppComponent {
+  selectedFile: File | null = null;  
+  isFormSubmitted: boolean = false;
   selectedUser: any;
   users: any[] = [];
   userForm: FormGroup;
@@ -76,54 +78,58 @@ export class AppComponent {
     });
   }
 
-  onSubmit() {
-    const userData = {
-      name: this.userForm.get('name')?.value,
-      age: this.userForm.get('age')?.value,
-      sex: this.userForm.get('sex')?.value,
-      document: this.userForm.get('document')?.value,
-      status: this.userForm.get('status')?.value,
-      address: this.userForm.get('address')?.value,
-    };
-
+  onSubmit(): void {
     if (this.userForm.valid) {
-      this.userData = {
+      const addressGroup = this.userForm.get('address') as FormGroup;
+
+      const address = addressGroup.enabled
+        ? addressGroup.value
+        : {
+            street: null,
+            number: null,
+            block: null,
+            apartment: null,
+            country: null,
+            city: null,
+            district: null,
+          };
+
+      const userData = {
         name: this.userForm.get('name')?.value,
         age: this.userForm.get('age')?.value,
         sex: this.userForm.get('sex')?.value,
         document: this.userForm.get('document')?.value,
         status: this.userForm.get('status')?.value,
-        address: this.userForm.get('address')?.value,
+        address,
       };
-      this.userService.createUser(userData).subscribe(() => {
-        this.openModalCreate();
-        this.getUsers();
-        this.userForm.reset({
-        name: '',
-        age: null,
-        sex: '',
-        document: '',
-        status: true,
-        address: {
-          street: '',
-          number: '',
-          block: '',
-          apartment: '',
-          country: '',
-          city: '',
-          district: '',
-        },
-      });
-          console.log('Dados enviados:', userData); // Verifique os dados no console
 
-      });
-      this.userForm.markAsPristine();
-      this.userForm.markAsUntouched();
+      const formData = new FormData();
+      formData.append('userData', JSON.stringify(userData));  
+
+      if (this.selectedFile) {
+        formData.append('file', this.selectedFile);
+        console.log('Arquivo anexado ao FormData:', this.selectedFile.name);
+      } else {
+        console.warn('Nenhum arquivo anexado ao FormData.');
+      }
+
+      this.userService.uploadUserWithExcel(formData).subscribe(
+        (response) => {
+          console.log('Usuário e arquivo enviados com sucesso:', response);
+          this.userForm.reset();
+          this.userForm.markAsPristine();
+          this.userForm.markAsUntouched();
+          this.getUsers();
+          this.clearAddress();
+        },
+        (error) => {
+          console.error('Erro ao enviar usuário e arquivo:', error);
+        }
+      );
     } else {
-      console.log('Form is invalid', userData);
+      console.error('Formulário inválido:', this.userForm.value);
     }
   }
-
   getUsers(): void {
     this.userService.getUsers().subscribe((response) => {
       this.users = response;
@@ -227,59 +233,46 @@ export class AppComponent {
   }
 
   onFileChange(event: any): void {
-    const target: DataTransfer = <DataTransfer>event.target;
+    const fileInput = event.target as HTMLInputElement;
 
-    if (target.files.length !== 1) {
-      console.error('Cannot use multiple files');
-      return;
-    }
+    if (fileInput.files && fileInput.files.length > 0) {
+      this.selectedFile = fileInput.files[0];  
+      console.log('Arquivo selecionado:', this.selectedFile);
 
-    const reader: FileReader = new FileReader();
-    reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-      const wsname: string = wb.SheetNames[0];
-      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-          if (data.length > 1) {
-      const [header, ...rows] = data;
-
-      // Verifique se os valores estão presentes e no formato correto
-      const address: string[] = rows[0] as string[];
-      const street = address[0] || '';
-      const number = address[1] || '';
-      const block = address[2] || '';
-      const apartment = address[3] || '';
-      const country = address[4] || '';
-      const city = address[5] || '';
-      const district = address[6] || '';
-
-      this.userForm.patchValue({
-        address: {
-          street,
-          number,
-          block,
-          apartment,
-          country,
-          city,
-          district,
-        },
-      });
-      const addressGroup = this.userForm.get(['address']) as FormGroup;
+      const addressGroup = this.userForm.get('address') as FormGroup;
       Object.keys(addressGroup.controls).forEach((key) => {
         const control = addressGroup.get(key);
-        control?.markAsDirty();
-        control?.updateValueAndValidity();
+        control?.disable(); 
+        control?.clearValidators();  
+        control?.updateValueAndValidity();  
       });
+    } else {
+      console.error('Nenhum arquivo selecionado.');
+      this.selectedFile = null;  
     }
-  };
-    reader.readAsBinaryString(target.files[0]);
   }
 
   clearAddress(): void {
     const fileInput = document.getElementById('excelFile') as HTMLInputElement;
-  if (fileInput) {
-    fileInput.value = ''; // Redefinir o valor do campo de arquivo
+    if (fileInput) {
+      fileInput.value = '';  
+    }
+
+    this.selectedFile = null;
+    this.enableAddressFields();  
   }
-}
+
+  enableAddressFields(): void {
+    const addressGroup = this.userForm.get('address') as FormGroup;
+
+    
+    Object.keys(addressGroup.controls).forEach((key) => {
+      const control = addressGroup.get(key);
+      control?.enable();  
+      control?.setValidators([Validators.required]);
+      control?.updateValueAndValidity();
+    });
+
+    console.log('Campos de endereço reativados.');
+  }
 }
